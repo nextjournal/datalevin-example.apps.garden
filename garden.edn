@@ -1,0 +1,2 @@
+{:project "datalevin-example"
+ :deploy-strategy :restart}
