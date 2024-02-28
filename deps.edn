@@ -1,4 +1,4 @@
-{:pats ["notebooks"]
+{:paths ["notebooks"]
  :deps
  {io.github.nextjournal/clerk {:git/sha "cbb19fd8f1a9b3b01c9ccb0d43c6dbb4571f3829"}
   datalevin/datalevin {:mvn/version "0.8.29"}}
