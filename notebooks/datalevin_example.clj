@@ -1,8 +1,7 @@
-;; # 🚸 A todo list persisted in datalevin
+;; # 📋 A todo list persisted in datalevin
+;; This short [Clerk](https://clerk.vision) notebook shows how to setup [datalevin](https://github.com/juji-io/datalevin?tab=readme-ov-file#datalevin) to work within [application.garden](https://application.garden) projects.
 (ns datalevin-example
-  {:nextjournal.clerk/no-cache true}
-  (:require [babashka.fs :as fs]
-            [datalevin.core :as d]
+  (:require [datalevin.core :as d]
             [nextjournal.clerk :as clerk]))
 
 {::clerk/visibility {:code :hide :result :hide}}
@@ -57,8 +56,22 @@
 (clerk/with-viewer tasks-viewer !tasks)
 
 {::clerk/visibility {:code :show :result :hide}}
+;; Start by adding Clerk and datalevin dependencies to your `deps.edn` file
+;;
+;;```clojure
+;;{:paths ["notebooks"]
+;; :deps
+;; {datalevin/datalevin {:mvn/version "0.8.29"}
+;;  io.github.nextjournal/clerk {:git/sha "cbb19fd8f1a9b3b01c9ccb0d43c6dbb4571f3829"}}
+;; :aliases
+;; {:nextjournal/garden {:exec-fn nextjournal.clerk/serve!
+;;                       :exec-args {:index "notebooks/datalevin_example.clj"}
+;;                       :jvm-opts ["--add-opens=java.base/java.nio=ALL-UNNAMED"
+;;                                  "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]}}}
+;;```
+;;
+;; Set up your datalevin connection to use the storage path in `GARDEN_STORAGE` env variable
 
-;; …some datalevin machinery (viewers hidden)
 (def schema
   {:task/description {:db/valueType :db.type/string}
    :task/id {:db/valueType :db.type/uuid
@@ -66,9 +79,11 @@
    :task/completed? {:db/valueType :db.type/boolean}
    :task/category {:db/valueType :db.type/keyword}})
 
-(def storage-dir (or (System/getenv "GARDEN_STORAGE") "/tmp/garden/storage"))
+(def conn (d/create-conn (str (System/getenv "GARDEN_STORAGE") "/todo-dtlv")
+                         schema
+                         {:auto-entity-time? true}))
 
-(def conn (d/create-conn (str (fs/path storage-dir "todo-dtlv")) schema {:auto-entity-time? true}))
+;; … and the usual [datalog](https://github.com/juji-io/datalevin?tab=readme-ov-file#use-as-a-datalog-store) business for managing entities in a triple store
 
 (defn ->map [m] (into {} (remove (comp #{"db"} namespace key)) m))
 
@@ -93,18 +108,5 @@
 (defn remove-task [id]
   (d/transact conn [[:db/retractEntity [:task/id (parse-uuid id)]]]))
 
+^{::clerk/visibility {:code :hide} ::clerk/no-cache true}
 (reset! !tasks (tasks))
-
-#_(comment
-
-    (add-task "Develop over nREPL")
-    (def id *1)
-    d/get-conn
-    (fs/delete-tree "/tmp/garden/storage/todo")
-    (fs/list-dir "/tmp/garden/storage/todo")
-    (->> (d/q '[:find [?t ...] :where [?t :task/id]]
-              (d/db conn))
-         (map #(d/entity (d/db conn) %))
-         (sort-by :db/created-at >)
-         (map d/touch)
-         (first) :task/id str))
