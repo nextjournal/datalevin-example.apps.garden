@@ -47,13 +47,13 @@
          (.addEventListener js/window "keydown" handle-key-press)
          #(.removeEventListener js/window "keydown" handle-key-press)) [handle-key-press])
 
-      [:div.p-1.flex.bg-amber-100.border-amber-200.border.rounded-md.h-10.w-full.pl-8.font-sans.text-xl
+      [:div.p-1.flex.bg-amber-100.border-amber-200.border.rounded-md.h-10.w-full.pl-8.font-sans.text-xl.mt-2
        [:input.bg-amber-100.focus:outline-none.text-md.w-full
         {:on-change #(reset! text (.. % -target -value))
          :placeholder "Enter text and press Enter…" :ref ref
-         :value @text :type "text"}]])) nil)
+         :value @text :type "text"}]])) {::clerk/width :wide} nil)
 
-(clerk/with-viewer tasks-viewer !tasks)
+(clerk/with-viewer tasks-viewer {::clerk/width :wide} !tasks)
 
 {::clerk/visibility {:code :show :result :hide}}
 ;; Start by adding Clerk and datalevin dependencies to your `deps.edn` file
