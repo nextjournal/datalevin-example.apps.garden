@@ -50,7 +50,7 @@
       [:div.p-1.flex.bg-amber-100.border-amber-200.border.rounded-md.h-10.w-full.pl-8.font-sans.text-xl.mt-2
        [:input.bg-amber-100.focus:outline-none.text-md.w-full
         {:on-change #(reset! text (.. % -target -value))
-         :placeholder "Enter text and press Enter…" :ref ref
+         :placeholder "Enter some text and press Return…" :ref ref
          :value @text :type "text"}]])) {::clerk/width :wide} nil)
 
 (clerk/with-viewer tasks-viewer {::clerk/width :wide} !tasks)
